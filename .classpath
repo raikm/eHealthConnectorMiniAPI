@@ -35,5 +35,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/Raik Müller/Downloads/ehealth_connector-fatjar-gen-1.8.0-202007.jar"/>
+	<classpathentry kind="lib" path="/ref-client/target/ref-client-0.0.2-SNAPSHOT-jar-with-dependencies.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
