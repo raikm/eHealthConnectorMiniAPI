@@ -39,6 +39,7 @@ import org.ehealth_connector.communication.xd.storedquery.FindDocumentsQuery;
 import org.ehealth_connector.communication.xd.storedquery.GetDocumentsQuery;
 import org.openhealthtools.ihe.common.ebxml._3._0.rim.ObjectRefType;
 import org.openhealthtools.ihe.xds.document.XDSDocument;
+import org.openhealthtools.ihe.xds.metadata.AvailabilityStatusType;
 import org.openhealthtools.ihe.xds.metadata.DocumentEntryType;
 import org.openhealthtools.ihe.xds.response.DocumentEntryResponseType;
 import org.openhealthtools.ihe.xds.response.XDSQueryResponseType;
@@ -47,16 +48,28 @@ import org.openhealthtools.ihe.xds.response.XDSRetrieveResponseType;
 public class XDSConnector {
 
 	// https://gitlab.com/ehealth-connector/demo-java/-/blob/master/src/main/java/org/ehealth_connector/demo/iti/xd/DemoDocSource.java
-	// Line 355
 	public static final String DOC_CDA = "C:/Users/Raik Müller/Desktop/ELGA-023-Entlassungsbrief_aerztlich_EIS-FullSupport.xml";
+
+	/** Sample ID of your Organization */
+	public static final String ORGANIZATIONAL_ID = "1.19.6.24.109.42.1"; // TODO:
+																			// check/find
+																			// ID?
+																			// equal
+																			// with
+																			// RepositoryID?
+
 	public static final Identificator EPR_PATIENT_ID = new Identificator(
-			"1.3.6.1.4.1.21367.2003.3.9", "eHC-Demo-Patient-ID");
+			"1.3.6.1.4.1.21367.2005.3.7", "eHC-Demo-Patient-ID");
 
 	public static void main(String[] args) throws Exception {
 		XDSConnector c = new XDSConnector();
-		final Destination registryUnsecure = new Destination("", new URI(""));
+		final Destination registryUnsecure = new Destination(ORGANIZATIONAL_ID,
+				new URI("http://localhost:9091/xds-iti18")); // TODO: not sure
+																// about this
+																// URL
 
-		final Destination repositoryUnsecure = new Destination("", new URI(""));
+		final Destination repositoryUnsecure = new Destination(ORGANIZATIONAL_ID,
+				new URI("http://localhost:9091/xds-iti43"));
 
 		final AffinityDomain adUnsecure = new AffinityDomain(null, registryUnsecure,
 				repositoryUnsecure);
@@ -118,8 +131,8 @@ public class XDSConnector {
 			conCom = new ConvenienceCommunication(affDomain);
 
 			// 1. Create and perform query for references
-			final FindDocumentsQuery fdq = new FindDocumentsQuery(patientId, null, null, null, null,
-					null, null, null, null); // AvailabilityStatus.APPROVED
+			final FindDocumentsQuery fdq = new FindDocumentsQuery(patientId,
+					AvailabilityStatusType.APPROVED_LITERAL);
 			qr = conCom.queryDocumentsReferencesOnly(fdq);
 			outStr.append("\nQuery for document references. Response status: "
 					+ qr.getStatus().getName());
