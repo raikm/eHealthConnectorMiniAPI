@@ -24,7 +24,7 @@ import java.net.URISyntaxException;
 import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
-import org.ehealth_connector.common.at.enums.LanguageCode;
+import org.ehealth_connector.common.enums.LanguageCode;
 import org.ehealth_connector.common.mdht.Author;
 import org.ehealth_connector.common.mdht.Code;
 import org.ehealth_connector.common.mdht.Identificator;
@@ -329,8 +329,9 @@ public class XDSConnector {
 				org.ehealth_connector.common.mdht.enums.ConfidentialityCode.NORMAL);
 
 		metaData.setCreationTime(new Date());
-		// metaData.setEntryUUID("1.3.6.1.4.1.21367.2005.3.9999.32");
-
+		// Bugfix
+		metaData.setEntryUUID("urn:uuid:2e82c1f6-a085-4c72-9da3-8640a32e42ab");
+		// metaData.setEntryUUID(UUID.randomUUID().toString());
 		metaData.setHealthcareFacilityTypeCode(
 				new Code("Outpatient", "urn:uuid:f33fb8ac-18af-42cc-ae0e-ed0b0bdb91e1",
 						"Connect-a-thon healthcareFacilityTypeCodes"));
@@ -397,22 +398,29 @@ public class XDSConnector {
 	public void uploadDocument() {
 
 		Destination repo = null;
+		Destination registryUnsecure = null;
 		try {
 			repo = getDestination(ORGANIZATIONAL_ID, "http://localhost:9091/xds-iti41", null, null,
 					null);
+			registryUnsecure = new Destination(ORGANIZATIONAL_ID,
+					new URI("http://localhost:9091/xds-iti18"));
 
 		} catch (final URISyntaxException e) {
 			System.out.print("SOURCE URI CANNOT BE SET: \n" + e.getMessage() + "\n\n");
 		}
 		try {
-			// Create unsecure destination
-			final AffinityDomain affinityDomain = new AffinityDomain(null, null, repo);
+			// Create unsecure destination: this was prov. from demo but reg ==
+			// null?
+			// final AffinityDomain affinityDomain = new AffinityDomain(null,
+			// null, repo);
 
-			final ConvenienceCommunication conCom1 = new ConvenienceCommunication(affinityDomain,
-					null, DocumentMetadataExtractionMode.DEFAULT_EXTRACTION,
+			final AffinityDomain adUnsecure = new AffinityDomain(null, registryUnsecure, repo);
+
+			final ConvenienceCommunication conCom1 = new ConvenienceCommunication(adUnsecure, null,
+					DocumentMetadataExtractionMode.DEFAULT_EXTRACTION,
 					SubmissionSetMetadataExtractionMode.NO_METADATA_EXTRACTION);
 
-			// Sub-Step 1: Sending CDA Document to Repository (NON-TLS)
+			// Sending CDA Document to Repository (NON-TLS)
 			final DocumentMetadata metaData1 = conCom1.addDocument(DocumentDescriptor.CDA_R2,
 					getDocCda(), getDocCda());
 			setMetaDatForCDA(metaData1);
