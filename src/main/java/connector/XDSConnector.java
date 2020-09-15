@@ -68,7 +68,7 @@ public class XDSConnector {
 																			// RepositroyID?
 
 	public static final Identificator EPR_PATIENT_ID = new Identificator(
-			"1.3.6.1.4.1.21367.13.20.1000", "P0710162247.3");
+			"1.3.6.1.4.1.21367.2005.3.7", "SELF-5");
 
 	public static void main(String[] args) throws Exception {
 		XDSConnector c = new XDSConnector();
@@ -76,12 +76,12 @@ public class XDSConnector {
 				new URI("http://localhost:9091/xds-iti18"));
 
 		final Destination repositoryUnsecure = new Destination(ORGANIZATIONAL_ID,
-				new URI("http://localhost:9091/xds-iti41"));
+				new URI("http://localhost:9091/xds-iti43"));
 
 		final AffinityDomain adUnsecure = new AffinityDomain(null, registryUnsecure,
 				repositoryUnsecure);
-		// c.queryRetrieveDemo(adUnsecure, EPR_PATIENT_ID);
-		c.uploadDocument();
+		c.queryRetrieveDemo(adUnsecure, EPR_PATIENT_ID);
+		// c.uploadDocument();
 
 	}
 
