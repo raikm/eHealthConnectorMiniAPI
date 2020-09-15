@@ -235,25 +235,9 @@ public class XDSConnector {
 								+ affDomain.getRegistryDestination().getUri());
 					} else {
 
-						// 3. Find the last PDF Document, retrieve it from the
+						// Find the last XML Document, retrieve it from the
 						// repository and store it to disc
-						DocumentEntryType docEntry = findLastDoc(qr, "application/pdf");
-						if (docEntry == null) {
-							outStr.append(
-									"\nNo PDF document found for patient '" + patientId.getRoot()
-											+ "/" + patientId.getExtension() + "' in registry: "
-											+ affDomain.getRegistryDestination().getUri() + "\n");
-						} else {
-							outStr.append("\nFound PDF document for patient '" + patientId.getRoot()
-									+ "/" + patientId.getExtension() + "' in registry: "
-									+ affDomain.getRegistryDestination().getUri() + ":\n"
-									+ DebugUtil.debugDocumentMetaData(docEntry));
-							retrieveAndStore(affDomain, docEntry);
-						}
-
-						// 4. Find the last XML Document, retrieve it from the
-						// repository and store it to disc
-						docEntry = findLastDoc(qr, "text/xml");
+						DocumentEntryType docEntry = findLastDoc(qr, "text/xml");
 						if (docEntry == null) {
 							outStr.append(
 									"\nNo XML document found for patient '" + patientId.getRoot()
