@@ -59,33 +59,18 @@ public class XDSConnector {
 	public static final String DOC_CDA = "demoDocSource/CDA-CH-VACD_Impfausweis.xml";
 
 	/** Sample ID of your Organization */
-	public static final String ORGANIZATIONAL_ID = "1.19.6.24.109.42.1"; // TODO://
-																			// check/find
-																			// ID?
-																			// =
-																			// RepositroyID?
+	public static final String ORGANIZATIONAL_ID = "1.19.6.24.109.42.1";
 
 	public static final Identificator EPR_PATIENT_ID = new Identificator(
 			"1.3.6.1.4.1.21367.2005.3.7", "SELF-5");
 
 	public static void main(String[] args) throws Exception {
 		XDSConnector c = new XDSConnector();
-		final Destination registryUnsecure = new Destination(ORGANIZATIONAL_ID,
-				new URI("http://localhost:9091/xds-iti18"));
-
-		final Destination repositoryUnsecure = new Destination(ORGANIZATIONAL_ID,
-				new URI("http://localhost:9091/xds-iti43"));
-
-		final AffinityDomain adUnsecure = new AffinityDomain(null, registryUnsecure,
-				repositoryUnsecure);
-
-		c.uploadDocument();
-		c.queryRetrieveDemo(adUnsecure, EPR_PATIENT_ID);
-
+		c.uploadDocument(EPR_PATIENT_ID);
+		c.queryRetrieveDemo(EPR_PATIENT_ID);
 	}
 
 	/** The out str. */
-	// String to display after the demo has run
 	private StringBuffer outStr = new StringBuffer();
 
 	/** The con com. */
@@ -188,10 +173,24 @@ public class XDSConnector {
 	 * @param assertionFile
 	 *            the assertion file
 	 */
-	public void queryRetrieveDemo(AffinityDomain affDomain, Identificator patientId) {
+	public void queryRetrieveDemo(Identificator patientId) {
+		AffinityDomain affDomain = null;
 		outStr = new StringBuffer();
 		int numberOfDocumentMetadataQuery = 10;
 		XDSQueryResponseType qr;
+
+		try {
+			Destination registryUnsecure = new Destination(ORGANIZATIONAL_ID,
+					new URI("http://localhost:9091/xds-iti18"));
+
+			Destination repositoryUnsecure = new Destination(ORGANIZATIONAL_ID,
+					new URI("http://localhost:9091/xds-iti43"));
+
+			affDomain = new AffinityDomain(null, registryUnsecure, repositoryUnsecure);
+
+		} catch (final URISyntaxException e) {
+			System.out.print("SOURCE URI CANNOT BE SET: \n" + e.getMessage() + "\n\n");
+		}
 
 		try {
 			// Create a new ConvenienceCommunication Object
@@ -262,7 +261,6 @@ public class XDSConnector {
 			e.printStackTrace();
 		}
 
-		// Display the demo result
 		System.out.print(outStr.toString() + "\n");
 	}
 
@@ -297,61 +295,35 @@ public class XDSConnector {
 		return stored;
 	}
 
-	public void setMetaDatForCDA(DocumentMetadata metaData) {
-		// metaData.addAuthor(new Author(new Name("Gerald", "Smitty"), "1234"));
-		// metaData.setDestinationPatientId(EPR_PATIENT_ID);
-		// metaData.setSourcePatientId(new Identificator("1.2.3.4",
-		// "2342134localid"));
-		// metaData.setCodedLanguage(LanguageCode.GERMAN_CODE);
-		// metaData.setTypeCode(new Code("Outpatient",
-		// "urn:uuid:f33fb8ac-18af-42cc-ae0e-ed0b0bdb91e1",
-		// "Connect-a-thon healthcareFacilityTypeCodes"));
-		// metaData.setFormatCode(new Code("CDAR2/IHE 1.0",
-		// "urn:uuid:a09d5840-386c-46f2-b5ad-9c3699a4309d", "Connect-a-thon
-		// formatCodes"));
-		//
-		// metaData.setClassCode(new Code("History and Physical",
-		// "urn:uuid:41a5887f-8865-4c09-adf7-e362475b143a", "Connect-a-thon
-		// classCodes"));
-		//
-		// metaData.addConfidentialityCode(
-		// org.ehealth_connector.common.mdht.enums.ConfidentialityCode.NORMAL);
-		//
+	public void setMetaDatForCDA(DocumentMetadata metaData, Identificator patientId) {
 		// metaData.setCreationTime(new Date());
-		// // Bugfix
 		// metaData.setEntryUUID("1.3.6.1.4.1.21367.2005.3.9999.33");
-		// // metaData.setEntryUUID(UUID.randomUUID().toString());
-		// metaData.setHealthcareFacilityTypeCode(
-		// new Code("Outpatient",
-		// "urn:uuid:f33fb8ac-18af-42cc-ae0e-ed0b0bdb91e1",
-		// "Connect-a-thon healthcareFacilityTypeCodes"));
-		//
-		metaData.setMimeType("text/xml");
-		// metaData.setPracticeSettingCode(
-		// new Code("General Medicine",
-		// "urn:uuid:cccf5598-8b07-4b77-a05e-ae952c785ead",
-		// "Connect-a-thon practiceSettingCodes"));
-		//
-		metaData.setUniqueId("1.3.6.1.4.1.21367.2005.3.9999.32");
+		// metaData.setEntryUUID(UUID.randomUUID().toString());
 		// metaData.setTitle("Title");
 
-		metaData.addAuthor(new Author(new Name("Gerald", "Smitty"), "1234"));
-		metaData.setDestinationPatientId(EPR_PATIENT_ID);
+		metaData.setMimeType("text/xml");
+		// TODO: generischer
+		metaData.setUniqueId("1.3.6.1.4.1.21367.2005.3.9999.32");
+		metaData.addAuthor(new Author(new Name("Raik", "Mueller"), "1234"));
+		metaData.setDestinationPatientId(patientId);
+		// TODO: generischer
 		metaData.setSourcePatientId(new Identificator("1.2.3.4", "2342134localid"));
-
-		metaData.setCodedLanguage(LanguageCode.FRENCH_CODE);
+		metaData.setCodedLanguage(LanguageCode.GERMAN_CODE);
+		// TODO: change name
 		metaData.setClassCode(new Code("History and Physical",
 				"urn:uuid:41a5887f-8865-4c09-adf7-e362475b143a", "Connect-a-thon classCodes"));
 		metaData.addConfidentialityCode(
 				org.ehealth_connector.common.mdht.enums.ConfidentialityCode.NORMAL);
 		metaData.setFormatCode(new Code("CDAR2/IHE 1.0",
 				"urn:uuid:a09d5840-386c-46f2-b5ad-9c3699a4309d", "Connect-a-thon formatCodes"));
+		// TODO: change name
 		metaData.setHealthcareFacilityTypeCode(
 				new Code("Outpatient", "urn:uuid:f33fb8ac-18af-42cc-ae0e-ed0b0bdb91e1",
 						"Connect-a-thon healthcareFacilityTypeCodes"));
 		metaData.setPracticeSettingCode(
 				new Code("General Medicine", "urn:uuid:cccf5598-8b07-4b77-a05e-ae952c785ead",
 						"Connect-a-thon practiceSettingCodes"));
+		// TODO: change name
 		metaData.setTypeCode(new Code("Outpatient", "urn:uuid:f33fb8ac-18af-42cc-ae0e-ed0b0bdb91e1",
 				"Connect-a-thon healthcareFacilityTypeCodes"));
 	}
@@ -407,68 +379,38 @@ public class XDSConnector {
 	 * @param assertionFile
 	 * @throws Exception
 	 */
-	public void uploadDocument() throws Exception {
+	public void uploadDocument(Identificator patientId) {
 
 		Destination repo = null;
-		Destination registryUnsecure = null;
 		try {
 			repo = getDestination(ORGANIZATIONAL_ID, "http://localhost:9091/xds-iti41", null, null,
 					null);
-			// registryUnsecure = new Destination(ORGANIZATIONAL_ID,
-			// new URI("http://localhost:9091/xds-iti18"));
-
 		} catch (final URISyntaxException e) {
 			System.out.print("SOURCE URI CANNOT BE SET: \n" + e.getMessage() + "\n\n");
 		}
-		// try {
-		// Create unsecure destination: this was prov. from demo but reg ==
-		// null?
-		// final AffinityDomain affinityDomain = new AffinityDomain(null,
-		// null, repo);
+		try {
+			// Create unsecure destination
+			final AffinityDomain affinityDomain = new AffinityDomain(null, null, repo);
 
-		// final AffinityDomain adUnsecure = new AffinityDomain(null,
-		// registryUnsecure, repo);
-		//
-		// final ConvenienceCommunication conCom1 = new
-		// ConvenienceCommunication(adUnsecure, null,
-		// DocumentMetadataExtractionMode.DEFAULT_EXTRACTION,
-		// SubmissionSetMetadataExtractionMode.NO_METADATA_EXTRACTION);
-		//
-		// // Sending CDA Document to Repository (NON-TLS)
-		// final DocumentMetadata metaData1 =
-		// conCom1.addDocument(DocumentDescriptor.CDA_R2,
-		// getDocCda(), getDocCda());
-		// setMetaDatForCDA(metaData1);
-		//
-		// SubmissionSetType subset =
-		// conCom1.generateDefaultSubmissionSetAttributes();
-		// subset.setContentTypeCode(XdsMetadataUtil.convertEhcCodeToCodedMetadataType(
-		// new Code("2.16.840.1.113883.6.96", "35971002", "Ambulatory care
-		// site")));
-		// final XDSResponseType response1 = conCom1.submit();
-		// printXdsResponse(response1);
+			final ConvenienceCommunication conCom1 = new ConvenienceCommunication(affinityDomain);
 
-		// Create unsecure destination
-		final AffinityDomain affinityDomain = new AffinityDomain(null, null, repo);
+			// Sending CDA Document to Repository (NON-TLS)
+			final DocumentMetadata metaData1 = conCom1.addDocument(DocumentDescriptor.CDA_R2,
+					getDocCda(), getDocCda());
+			setMetaDatForCDA(metaData1, patientId);
 
-		final ConvenienceCommunication conCom1 = new ConvenienceCommunication(affinityDomain);
+			System.out.print("Sending CDA Document...");
 
-		// Sub-Step 1: Sending CDA Document to Repository (NON-TLS)
-		final DocumentMetadata metaData1 = conCom1.addDocument(DocumentDescriptor.CDA_R2,
-				getDocCda(), getDocCda());
-		setMetaDatForCDA(metaData1);
+			SubmissionSetType subset = conCom1.generateDefaultSubmissionSetAttributes();
+			subset.setContentTypeCode(XdsMetadataUtil.convertEhcCodeToCodedMetadataType(
+					new Code("2.16.840.1.113883.6.96", "35971002", "Ambulatory care site")));
 
-		System.out.print("Sending CDA Document");
+			final XDSResponseType response1 = conCom1.submit();
+			printXdsResponse(response1);
 
-		SubmissionSetType subset = conCom1.generateDefaultSubmissionSetAttributes();
-		subset.setContentTypeCode(XdsMetadataUtil.convertEhcCodeToCodedMetadataType(
-				new Code("2.16.840.1.113883.6.96", "35971002", "Ambulatory care site")));
-		final XDSResponseType response1 = conCom1.submit();
-		printXdsResponse(response1);
-
-		// } catch (final Exception e) {
-		// System.out.print(e.getMessage() + "\n\n");
-		// }
+		} catch (final Exception e) {
+			System.out.print(e.getMessage() + "\n\n");
+		}
 
 	}
 
