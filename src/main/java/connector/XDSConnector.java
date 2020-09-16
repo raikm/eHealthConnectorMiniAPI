@@ -53,6 +53,8 @@ import org.openhealthtools.ihe.xds.response.XDSResponseType;
 import org.openhealthtools.ihe.xds.response.XDSRetrieveResponseType;
 import org.openhealthtools.ihe.xds.response.XDSStatusType;
 
+import py4j.GatewayServer;
+
 public class XDSConnector {
 
 	// https://gitlab.com/ehealth-connector/demo-java/-/blob/master/src/main/java/org/ehealth_connector/demo/iti/xd/DemoDocSource.java
@@ -64,15 +66,18 @@ public class XDSConnector {
 	public static final Identificator EPR_PATIENT_ID = new Identificator(
 			"1.3.6.1.4.1.21367.2005.3.7", "SELF-5");
 
+	// TESTs
 	public static void main(String[] args) throws Exception {
-		XDSConnector c = new XDSConnector();
-		c.uploadDocument(EPR_PATIENT_ID);
-		c.queryRetrieveDemo(EPR_PATIENT_ID);
+		XDSConnector xdsconnector = new XDSConnector();
+		// app is now the gateway.entry_point
+		GatewayServer server = new GatewayServer(xdsconnector);
+		server.start();
+		// c.uploadDocument(EPR_PATIENT_ID);
+		// c.queryRetrieveDemo(EPR_PATIENT_ID);
 	}
 
 	/** The out str. */
 	private StringBuffer outStr = new StringBuffer();
-
 	/** The con com. */
 	private ConvenienceCommunication conCom;
 
@@ -369,6 +374,10 @@ public class XDSConnector {
 			return false;
 		}
 		return true;
+	}
+
+	public void testMethodPython() {
+		System.out.println("test");
 	}
 
 	/**
