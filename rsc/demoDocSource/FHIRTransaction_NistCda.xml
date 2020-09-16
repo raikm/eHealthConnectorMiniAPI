@@ -1,0 +1,307 @@
+<DocumentManifest xmlns="http://hl7.org/fhir">
+   <contained>
+      <MessageHeader xmlns="http://hl7.org/fhir">
+         <id value="1"/>
+         <extension url="urn:ehealth_connector:FhirExtension:useAsRepositoryDestination">
+            <valueString value="dummy"/>
+         </extension>
+         <event>
+            <system value="urn:oid:2.999"/>
+            <code value="dummy"/>
+            <display value="dummy code to make FHIR resource valid"/>
+         </event>
+         <destination>
+            <name value="1.3.6.1.4.1.21367.13.20.1000"/>
+            <endpoint value="http://hit-dev.nist.gov:12090/xdstools/sim/default__rg/rep/prb"/>
+         </destination>
+         <timestamp value="2015-10-30T07:00:23.307+01:00"/>
+         <source>
+            <name value="2.16.756.5.30.1.139.1.1.3"/>
+            <software value="1.3.6.1.4.1.21367.101"/>
+            <endpoint value="http://localhost"/>
+         </source>
+      </MessageHeader>
+   </contained>
+   <contained>
+      <DocumentManifest xmlns="http://hl7.org/fhir">
+         <id value="2"/>
+         <extension url="urn:ehealth_connector:FhirExtension:useAsComment">
+            <valueString value="This is a comment"/>
+         </extension>
+         <status value="current"/>
+         <type>
+            <coding>
+               <system value="urn:oid:2.16.840.1.113883.6.96"/>
+               <code value="22232009"/>
+            </coding>
+            <text value="Hospital"/>
+         </type>
+         <subject>
+            <reference value="#3"/>
+         </subject>
+         <author>
+            <reference value="#5"/>
+         </author>
+         <recipient>
+            <reference value="#6"/>
+         </recipient>
+         <source value="urn:oid:1.3.6.1.4.1.21367.88888888"/>
+         <description value="Demo Submission Set NIST Cda"/>
+         <content>
+            <pReference>
+               <reference value="2.16.756.5.30.1.139.1.1.3.20180721084119827"/>
+            </pReference>
+         </content>
+      </DocumentManifest>
+   </contained>
+   <contained>
+      <Patient xmlns="http://hl7.org/fhir">
+         <id value="3"/>
+         <identifier>
+            <system value="urn:oid:2.16.756.5.30.999999999999"/>
+            <value value="898989"/>
+         </identifier>
+         <identifier>
+            <system value="urn:oid:2.16.756.5.30.1.139.1.1.3"/>
+            <value value="eHC123"/>
+         </identifier>
+         <identifier>
+            <system value="urn:oid:1.3.6.1.4.1.21367.13.20.1000"/>
+            <value value="P0710162247.3"/>
+         </identifier>
+         <name>
+            <family value="Tigrinja"/>
+            <given value="Sesuna"/>
+         </name>
+         <telecom>
+            <system value="phone"/>
+            <value value="tel:+41.32.685.12.34"/>
+            <use value="home"/>
+         </telecom>
+         <telecom>
+            <system value="phone"/>
+            <value value="tel:+41.32.123.77.88"/>
+            <use value="work"/>
+         </telecom>
+         <gender value="female"/>
+         <birthDate value="2000-04-04"/>
+         <address>
+            <use value="home"/>
+            <line value="Leidensweg 10"/>
+            <city value="Specimendorf"/>
+            <postalCode value="9876"/>
+            <country value="CHE"/>
+         </address>
+         <managingOrganization>
+            <reference value="#4"/>
+         </managingOrganization>
+      </Patient>
+   </contained>
+   <contained>
+      <Organization xmlns="http://hl7.org/fhir">
+         <id value="4"/>
+         <identifier>
+            <system value="urn:oid:2.51.1.3"/>
+            <value value="7609999999999"/>
+         </identifier>
+         <name value="Gruppenpraxis CH"/>
+         <telecom>
+            <system value="phone"/>
+            <value value="tel:+41.32.234.55.66"/>
+            <use value="work"/>
+         </telecom>
+         <telecom>
+            <system value="fax"/>
+            <value value="fax:+41.32.234.66.77"/>
+            <use value="work"/>
+         </telecom>
+         <telecom>
+            <system value="email"/>
+            <value value="mailto:bereit@gruppenpraxis.ch"/>
+            <use value="work"/>
+         </telecom>
+         <telecom>
+            <system value="url"/>
+            <value value="http://www.gruppenpraxis.ch"/>
+            <use value="work"/>
+         </telecom>
+         <address>
+            <use value="work"/>
+            <line value="Doktorgasse 2"/>
+            <city value="Musterhausen"/>
+            <postalCode value="8888"/>
+            <country value="CHE"/>
+         </address>
+      </Organization>
+   </contained>
+   <contained>
+      <Practitioner xmlns="http://hl7.org/fhir">
+         <id value="5"/>
+         <identifier>
+            <system value="urn:oid:2.51.1.3"/>
+            <value value="7607777777777"/>
+         </identifier>
+         <name>
+            <family value="Bereit"/>
+            <given value="Allzeit"/>
+            <prefix value="Dr. med."/>
+            <suffix value="Facharzt für Allgemeine Medizin"/>
+         </name>
+      </Practitioner>
+   </contained>
+   <contained>
+      <Organization xmlns="http://hl7.org/fhir">
+         <id value="6"/>
+         <identifier>
+            <system value="urn:oid:2.51.1.3"/>
+            <value value="7608888888888"/>
+         </identifier>
+         <name value="CDSS AG"/>
+         <telecom>
+            <system value="phone"/>
+            <value value="tel:+41.99.999.99.99"/>
+            <use value="work"/>
+         </telecom>
+         <telecom>
+            <system value="email"/>
+            <value value="mailto:info@cdss.ch"/>
+            <use value="work"/>
+         </telecom>
+         <telecom>
+            <system value="url"/>
+            <value value="http://www.cdss.ch"/>
+            <use value="work"/>
+         </telecom>
+         <address>
+            <use value="work"/>
+            <line value="Rathaus"/>
+            <city value="Musterhausen"/>
+            <postalCode value="8888"/>
+            <country value="CHE"/>
+         </address>
+      </Organization>
+   </contained>
+   <contained>
+      <DocumentReference xmlns="http://hl7.org/fhir">
+         <id value="7"/>
+         <extension url="urn:ehealth_connector:FhirExtension:useAsMetadataLanguage">
+            <valueString value="en"/>
+         </extension>
+         <extension url="urn:ehealth_connector:FhirExtension:useAsDocumentDescriptor">
+            <valueCoding>
+               <extension url="urn:ehealth_connector:FhirExtension:useAsDocumentDescriptor">
+                  <valueString value="dummy"/>
+               </extension>
+               <system value="urn:oid:dummy"/>
+               <code value="CDA-R2!text/xml"/>
+            </valueCoding>
+         </extension>
+         <extension url="urn:ehealth_connector:FhirExtension:useAsComment">
+            <valueString value="This is a comment"/>
+         </extension>
+         <extension url="urn:ehealth_connector:FhirExtension:useAsPracticeSettingCode">
+            <valueCoding>
+               <system value="urn:oid:1.3.6.1.4.1.21367.2017.3"/>
+               <code value="Practice-L"/>
+               <display value="Other"/>
+            </valueCoding>
+         </extension>
+         <extension url="urn:ehealth_connector:FhirExtension:useAsDocumentDescriptor">
+            <valueCoding>
+               <extension url="urn:ehealth_connector:FhirExtension:useAsDocumentDescriptor">
+                  <valueString value="dummy"/>
+               </extension>
+               <system value="urn:oid:dummy"/>
+               <code value="CDA-R2!text/xml"/>
+            </valueCoding>
+         </extension>
+         <extension url="urn:ehealth_connector:FhirExtension:useAsFormatCode">
+            <valueCoding>
+               <system value="urn:oid:1.3.6.1.4.1.19376.1.2.3"/>
+               <code value="urn:ihe:pcc:ic:2009"/>
+               <display value="Immunization Content (IC)"/>
+            </valueCoding>
+         </extension>
+         <masterIdentifier>
+            <system value="urn:oid:2.16.756.5.30.1.139.1.1.3"/>
+            <value value="2.16.756.5.30.1.139.1.1.3.20180721084119824"/>
+         </masterIdentifier>
+         <status value="current"/>
+         <type>
+            <coding>
+               <system value="urn:oid:2.16.840.1.113883.6.1"/>
+               <code value="11369-6"/>
+            </coding>
+            <text value="Immunization"/>
+         </type>
+         <class>
+            <coding>
+               <system value="urn:oid:1.3.6.1.4.1.19376.1.2.6.1"/>
+               <code value="SUMMARY"/>
+            </coding>
+            <text value="Summary"/>
+         </class>
+         <created value="2014-06-04T00:00:00+02:00"/>
+         <indexed value="2014-06-04T00:00:00.000+02:00"/>
+         <author>
+            <reference value="#5"/>
+         </author>
+         <authenticator>
+            <reference value="#5"/>
+         </authenticator>
+         <description value="eVACDOC"/>
+         <securityLabel>
+            <coding>
+               <system value="urn:oid:2.16.840.1.113883.5.25"/>
+               <code value="R"/>
+            </coding>
+            <text value="restricted"/>
+         </securityLabel>
+         <content>
+            <attachment>
+               <language value="de-CH"/>
+               <url value="demoDocSource/CDA-CH-VACD_Impfausweis.xml"/>
+            </attachment>
+            <format>
+               <extension url="urn:ehealth_connector:FhirExtension:useAsMimeType">
+                  <valueString value="dummy"/>
+               </extension>
+               <system value="urn:oid:dummy"/>
+               <code value="text/xml"/>
+            </format>
+         </content>
+         <context>
+            <period>
+               <start value="2014-06-01T00:00:00+02:00"/>
+               <end value="2014-06-04T00:00:00+02:00"/>
+            </period>
+            <facilityType>
+               <coding>
+                  <system value="urn:oid:2.16.840.1.113883.6.96"/>
+                  <code value="225728007"/>
+               </coding>
+               <text value="Accident and Emergency department"/>
+            </facilityType>
+            <sourcePatientInfo>
+               <reference value="#3"/>
+            </sourcePatientInfo>
+         </context>
+      </DocumentReference>
+   </contained>
+   <status value="current"/>
+   <content>
+      <pReference>
+         <reference value="#1"/>
+      </pReference>
+   </content>
+   <content>
+      <pReference>
+         <reference value="#2"/>
+      </pReference>
+   </content>
+   <content>
+      <pReference>
+         <reference value="#7"/>
+      </pReference>
+   </content>
+</DocumentManifest>
