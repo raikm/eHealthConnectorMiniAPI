@@ -25,10 +25,8 @@ import java.net.URISyntaxException;
 
 import org.apache.commons.io.FileUtils;
 import org.ehealth_connector.common.enums.LanguageCode;
-import org.ehealth_connector.common.mdht.Author;
 import org.ehealth_connector.common.mdht.Code;
 import org.ehealth_connector.common.mdht.Identificator;
-import org.ehealth_connector.common.mdht.Name;
 import org.ehealth_connector.common.utils.DebugUtil;
 import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.Util;
@@ -56,9 +54,6 @@ import org.openhealthtools.ihe.xds.response.XDSStatusType;
 import py4j.GatewayServer;
 
 public class XDSConnector {
-
-	// https://gitlab.com/ehealth-connector/demo-java/-/blob/master/src/main/java/org/ehealth_connector/demo/iti/xd/DemoDocSource.java
-	public static final String DOC_CDA = "demoDocSource/CDA-CH-VACD_Impfausweis.xml";
 
 	/** Sample ID of your Organization */
 	public static final String ORGANIZATIONAL_ID = "1.19.6.24.109.42.1";
@@ -138,8 +133,9 @@ public class XDSConnector {
 	 * @return a CDA document stream
 	 * @throws FileNotFoundException
 	 */
-	private InputStream getDocCda() {
-		InputStream cda = getClass().getResourceAsStream("/" + DOC_CDA);
+	private InputStream getDocCda(String path) {
+		System.out.println("Get File: " + path);
+		InputStream cda = getClass().getResourceAsStream("/demoDocSource/" + path);
 		return cda;
 	}
 
@@ -305,43 +301,59 @@ public class XDSConnector {
 		return stored;
 	}
 
-	public void setMetaDatForCDA(DocumentMetadata metaData, Identificator patientId) {
-		// set metaData only needed for IPF XDS Framework
-		// TODO: change name
+	/** set metaData only needed for IPF XDS Framework **/
+	public void setMetaDatForCDA(DocumentMetadata metaData, Identificator patientId,
+			String documentId) {
+		// metaData.addAuthor(new Author(new Name("Sigrid", "Kollmann"),
+		// "2323"));
+		// Dokumentenklasse (Oberklasse) z.B.: 18842-5 „Entlassungsbrief“
+		// TODO: optional to extract from each CDA but not necarry for test
+		// cases
 		metaData.setClassCode(new Code("History and Physical",
 				"urn:uuid:41a5887f-8865-4c09-adf7-e362475b143a", "Connect-a-thon classCodes"));
-
-		metaData.setMimeType("text/xml");
-
-		// TODO: generischer
-		metaData.setUniqueId("1.3.6.1.4.1.21367.2005.3.9999.32"); // Global
-																	// eindeutige
-																	// ID des
-																	// Dokuments
-		metaData.addAuthor(new Author(new Name("Raik", "Mueller"), "1234"));
-		metaData.setDestinationPatientId(patientId);
-		// TODO: generischer
-		metaData.setSourcePatientId(new Identificator("1.2.3.4", "2342134localid"));
-		metaData.setCodedLanguage(LanguageCode.GERMAN_CODE);
-
+		// Vertraulichkeitscode des Dokuments
 		metaData.addConfidentialityCode(
 				org.ehealth_connector.common.mdht.enums.ConfidentialityCode.NORMAL);
+		// TODO: optional to extract from each CDA but not necarry for test
+		// cases
+		// metaData.setCreationTime(new Date());
+		// UUID des Metadaten-Records des Doku- ments (XDS DocumentEntry)
+		// metaData.setEntryUUID(UUID.randomUUID().toString());
 		metaData.setFormatCode(new Code("CDAR2/IHE 1.0",
 				"urn:uuid:a09d5840-386c-46f2-b5ad-9c3699a4309d", "Connect-a-thon formatCodes"));
-		// TODO: change name
+		// Klassifizierung des GDA
+		// TODO: change name?
 		metaData.setHealthcareFacilityTypeCode(
 				new Code("Outpatient", "urn:uuid:f33fb8ac-18af-42cc-ae0e-ed0b0bdb91e1",
 						"Connect-a-thon healthcareFacilityTypeCodes"));
+		metaData.setCodedLanguage(LanguageCode.GERMAN_CODE);
+		metaData.setMimeType("text/xml");
+		// Patienten-ID in der XDS Affinity Domain
+		metaData.setDestinationPatientId(patientId);
+		// Fachliche Zuordnung des Dokuments
+		// TODO: optional to extract from each CDA but not necarry for test
+		// cases
 		metaData.setPracticeSettingCode(
 				new Code("General Medicine", "urn:uuid:cccf5598-8b07-4b77-a05e-ae952c785ead",
 						"Connect-a-thon practiceSettingCodes"));
-		// TODO: change name
+		// Patienten ID im Informationssystem des GDA. z.B.: im KIS des KH
+		// TODO: optional to extract from each CDA but not necarry for test
+		// cases
+		metaData.setSourcePatientId(new Identificator("1.2.3.4", "2342134localid"));
+		// Dokumententyp (Unterklasse) codierter Wert, z.B.: 11490-0,
+		// „Entlassungsbrief aus statio- närer Behandlung (Arzt)“
+		// TODO: change name?
 		metaData.setTypeCode(new Code("Outpatient", "urn:uuid:f33fb8ac-18af-42cc-ae0e-ed0b0bdb91e1",
 				"Connect-a-thon healthcareFacilityTypeCodes"));
 
-		// metaData.setCreationTime(new Date());
-		// metaData.setEntryUUID("1.3.6.1.4.1.21367.2005.3.9999.33");
-		// metaData.setEntryUUID(UUID.randomUUID().toString());
+		// Global eindeutige ID des Dokuments
+		metaData.setUniqueId(documentId);
+		if (metaData.getMdhtDocumentEntryType() != null
+				&& metaData.getMdhtDocumentEntryType().getLegalAuthenticator() != null) {
+			metaData.getMdhtDocumentEntryType().getLegalAuthenticator()
+					.setAssigningAuthorityName("");
+		}
+
 	}
 
 	/**
@@ -399,7 +411,7 @@ public class XDSConnector {
 	 * @param assertionFile
 	 * @throws Exception
 	 */
-	public void uploadDocument(String oid, String id) {
+	public void uploadDocument(String oid, String id, String documentId, String docPath) {
 
 		Identificator patientId = new Identificator(oid, id);
 
@@ -418,8 +430,8 @@ public class XDSConnector {
 
 			// Sending CDA Document to Repository (NON-TLS)
 			final DocumentMetadata metaData1 = conCom1.addDocument(DocumentDescriptor.CDA_R2,
-					getDocCda(), getDocCda());
-			setMetaDatForCDA(metaData1, patientId);
+					getDocCda(docPath), getDocCda(docPath));
+			setMetaDatForCDA(metaData1, patientId, documentId);
 
 			System.out.print("Sending CDA Document...");
 
