@@ -37,8 +37,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/Raik Müller/Downloads/ehealth_connector-fatjar-gen-1.8.0-202007.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Raik Müller/Documents/GitHub/refclient-master/refclient-master/target/ref-client-0.0.2-SNAPSHOT-jar-with-dependencies.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Raik Müller/Desktop/ehealth_connector-common-at-1.10-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Raik Müller/Desktop/ehealth_connector-communication-at-1.10-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Raik Müller/AppData/Local/Programs/Python/Python38-32/Lib/site-packages/py4j-0.10.9.1-py3.8.egg/share/py4j/py4j0.10.9.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
