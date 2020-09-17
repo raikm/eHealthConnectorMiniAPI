@@ -29,7 +29,6 @@ import org.ehealth_connector.common.mdht.Code;
 import org.ehealth_connector.common.mdht.Identificator;
 import org.ehealth_connector.common.utils.DebugUtil;
 import org.ehealth_connector.common.utils.FileUtil;
-import org.ehealth_connector.common.utils.Util;
 import org.ehealth_connector.common.utils.XdsMetadataUtil;
 import org.ehealth_connector.communication.AffinityDomain;
 import org.ehealth_connector.communication.ConvenienceCommunication;
@@ -58,19 +57,11 @@ public class XDSConnector {
 	/** Sample ID of your Organization */
 	public static final String ORGANIZATIONAL_ID = "1.19.6.24.109.42.1";
 
-	// public static final Identificator EPR_PATIENT_ID = new Identificator(
-	// "1.3.6.1.4.1.21367.2005.3.7", "SELF-5");
-
-	// TESTs
 	public static void main(String[] args) throws Exception {
 		XDSConnector xdsconnector = new XDSConnector();
-
-		// app is now the gateway.entry_point
+		// xds_connector is now the gateway.entry_point
 		GatewayServer server = new GatewayServer(xdsconnector);
 		server.start();
-		// c.uploadDocument(String oid, String id);
-		// c.queryRetrieveDemo(EPR_PATIENT_ID);
-
 	}
 
 	/** The out str. */
@@ -186,10 +177,10 @@ public class XDSConnector {
 		XDSQueryResponseType qr;
 
 		try {
-			Destination registryUnsecure = new Destination(ORGANIZATIONAL_ID,
+			Destination registryUnsecure = new Destination(oid,
 					new URI("http://localhost:9091/xds-iti18"));
 
-			Destination repositoryUnsecure = new Destination(ORGANIZATIONAL_ID,
+			Destination repositoryUnsecure = new Destination(oid,
 					new URI("http://localhost:9091/xds-iti43"));
 
 			affDomain = new AffinityDomain(null, registryUnsecure, repositoryUnsecure);
@@ -348,6 +339,7 @@ public class XDSConnector {
 
 		// Global eindeutige ID des Dokuments
 		metaData.setUniqueId(documentId);
+
 		if (metaData.getMdhtDocumentEntryType() != null
 				&& metaData.getMdhtDocumentEntryType().getLegalAuthenticator() != null) {
 			metaData.getMdhtDocumentEntryType().getLegalAuthenticator()
@@ -385,7 +377,10 @@ public class XDSConnector {
 			final InputStream docIS = document.getStream();
 
 			// Create a new File with the RepositoryId as prefix
-			final String filePath = Util.getTempDirectory();
+			final String filePath = "C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files"; // Temp
+																																						// Folder:
+																																						// Util.getTempDirectory();
+
 			final File targetFile = new File(filePath + FileUtil.getPlatformSpecificPathSeparator()
 					+ docEntry.getRepositoryUniqueId() + "_"
 					+ docEntry.getEntryUUID().replace("urn:uuid:", "") + "_"
