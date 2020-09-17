@@ -63,17 +63,19 @@ public class XDSConnector {
 	/** Sample ID of your Organization */
 	public static final String ORGANIZATIONAL_ID = "1.19.6.24.109.42.1";
 
-	public static final Identificator EPR_PATIENT_ID = new Identificator(
-			"1.3.6.1.4.1.21367.2005.3.7", "SELF-5");
+	// public static final Identificator EPR_PATIENT_ID = new Identificator(
+	// "1.3.6.1.4.1.21367.2005.3.7", "SELF-5");
 
 	// TESTs
 	public static void main(String[] args) throws Exception {
 		XDSConnector xdsconnector = new XDSConnector();
+
 		// app is now the gateway.entry_point
 		GatewayServer server = new GatewayServer(xdsconnector);
 		server.start();
-		// c.uploadDocument(EPR_PATIENT_ID);
+		// c.uploadDocument(String oid, String id);
 		// c.queryRetrieveDemo(EPR_PATIENT_ID);
+
 	}
 
 	/** The out str. */
@@ -178,7 +180,10 @@ public class XDSConnector {
 	 * @param assertionFile
 	 *            the assertion file
 	 */
-	public void queryRetrieveDemo(Identificator patientId) {
+	public void queryRetrieveDemo(String oid, String id) {
+
+		Identificator patientId = new Identificator(oid, id);
+
 		AffinityDomain affDomain = null;
 		outStr = new StringBuffer();
 		int numberOfDocumentMetadataQuery = 10;
@@ -301,22 +306,24 @@ public class XDSConnector {
 	}
 
 	public void setMetaDatForCDA(DocumentMetadata metaData, Identificator patientId) {
-		// metaData.setCreationTime(new Date());
-		// metaData.setEntryUUID("1.3.6.1.4.1.21367.2005.3.9999.33");
-		// metaData.setEntryUUID(UUID.randomUUID().toString());
-		// metaData.setTitle("Title");
+		// set metaData only needed for IPF XDS Framework
+		// TODO: change name
+		metaData.setClassCode(new Code("History and Physical",
+				"urn:uuid:41a5887f-8865-4c09-adf7-e362475b143a", "Connect-a-thon classCodes"));
 
 		metaData.setMimeType("text/xml");
+
 		// TODO: generischer
-		metaData.setUniqueId("1.3.6.1.4.1.21367.2005.3.9999.32");
+		metaData.setUniqueId("1.3.6.1.4.1.21367.2005.3.9999.32"); // Global
+																	// eindeutige
+																	// ID des
+																	// Dokuments
 		metaData.addAuthor(new Author(new Name("Raik", "Mueller"), "1234"));
 		metaData.setDestinationPatientId(patientId);
 		// TODO: generischer
 		metaData.setSourcePatientId(new Identificator("1.2.3.4", "2342134localid"));
 		metaData.setCodedLanguage(LanguageCode.GERMAN_CODE);
-		// TODO: change name
-		metaData.setClassCode(new Code("History and Physical",
-				"urn:uuid:41a5887f-8865-4c09-adf7-e362475b143a", "Connect-a-thon classCodes"));
+
 		metaData.addConfidentialityCode(
 				org.ehealth_connector.common.mdht.enums.ConfidentialityCode.NORMAL);
 		metaData.setFormatCode(new Code("CDAR2/IHE 1.0",
@@ -331,6 +338,10 @@ public class XDSConnector {
 		// TODO: change name
 		metaData.setTypeCode(new Code("Outpatient", "urn:uuid:f33fb8ac-18af-42cc-ae0e-ed0b0bdb91e1",
 				"Connect-a-thon healthcareFacilityTypeCodes"));
+
+		// metaData.setCreationTime(new Date());
+		// metaData.setEntryUUID("1.3.6.1.4.1.21367.2005.3.9999.33");
+		// metaData.setEntryUUID(UUID.randomUUID().toString());
 	}
 
 	/**
@@ -376,8 +387,8 @@ public class XDSConnector {
 		return true;
 	}
 
-	public void testMethodPython() {
-		System.out.println("test");
+	public void testPythonConnection() {
+		System.out.println("Python Connection Test: Successful\n");
 	}
 
 	/**
@@ -388,7 +399,9 @@ public class XDSConnector {
 	 * @param assertionFile
 	 * @throws Exception
 	 */
-	public void uploadDocument(Identificator patientId) {
+	public void uploadDocument(String oid, String id) {
+
+		Identificator patientId = new Identificator(oid, id);
 
 		Destination repo = null;
 		try {
@@ -411,6 +424,7 @@ public class XDSConnector {
 			System.out.print("Sending CDA Document...");
 
 			SubmissionSetType subset = conCom1.generateDefaultSubmissionSetAttributes();
+			// TODO: needed?
 			subset.setContentTypeCode(XdsMetadataUtil.convertEhcCodeToCodedMetadataType(
 					new Code("2.16.840.1.113883.6.96", "35971002", "Ambulatory care site")));
 
