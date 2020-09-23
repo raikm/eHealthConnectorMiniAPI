@@ -198,10 +198,19 @@ public class XDSConnector {
 		documentEntryResponse = conCom.queryDocuments(fdq);
 		List<DocumentEntryResponseType> responses = documentEntryResponse
 				.getDocumentEntryResponses();
-		if (responses.size() == 1) {
+		if (responses.size() > 0) {
 			// TODO: make Temp folder empty
+			DocumentEntryType entry = null;
+			for (DocumentEntryResponseType e : responses) {
+				DocumentEntryType _entry = e.getDocumentEntry();
+				if (_entry.getUniqueId() == documentId) {
+					entry = _entry;
+				} else {
+					return "NO_DOCUMENT_FOUND";
+				}
 
-			DocumentEntryType entry = responses.get(0).getDocumentEntry();
+			}
+
 			final DocumentRequest documentRequest = new DocumentRequest(
 					entry.getRepositoryUniqueId(), affDomain.getRepositoryDestination().getUri(),
 					entry.getUniqueId());
@@ -515,13 +524,16 @@ public class XDSConnector {
 
 	}
 
-	private Boolean validateNewDocument(String oid, String id, String documentId) {
+	/**
+	 * <div class="en">check if document doesn't already exist for this
+	 * patient</div>
+	 *
+	 */
+	public boolean validateNewDocument(String oid, String id, String documentId) {
 		Identificator patientId = new Identificator(oid, id);
-
 		AffinityDomain affDomain = null;
 		outStr = new StringBuffer();
 		XDSQueryResponseType documentEntryResponse;
-
 		try {
 			Destination registryUnsecure = new Destination(oid,
 					new URI("http://localhost:9091/xds-iti18"));
@@ -542,29 +554,14 @@ public class XDSConnector {
 		documentEntryResponse = conCom.queryDocuments(fdq);
 		List<DocumentEntryResponseType> responses = documentEntryResponse
 				.getDocumentEntryResponses();
-		if (responses.size() == 1) {
-			// TODO: make Temp folder empty
-
-			DocumentEntryType entry = responses.get(0).getDocumentEntry();
-			final DocumentRequest documentRequest = new DocumentRequest(
-					entry.getRepositoryUniqueId(), affDomain.getRepositoryDestination().getUri(),
-					entry.getUniqueId());
-			final XDSRetrieveResponseType rrt = conCom.retrieveDocument(documentRequest);
-			final XDSDocument document = rrt.getAttachments().get(0);
-			final InputStream docIS = document.getStream();
-
-			File file = new File(
-					"C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files\\temp\\return_cda.xml");
-			try {
-				FileUtils.copyInputStreamToFile(docIS, file);
-
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		if (responses.size() > 0) {
+			for (DocumentEntryResponseType e : responses) {
+				DocumentEntryType _entry = e.getDocumentEntry();
+				if (_entry.getUniqueId() == documentId)
+					return true;
 			}
-
 		}
-		return true;
+		return false;
 	}
 
 }
