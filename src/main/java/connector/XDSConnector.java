@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.ehealth_connector.common.enums.LanguageCode;
@@ -66,6 +67,7 @@ public class XDSConnector {
 
 	/** The out str. */
 	private StringBuffer outStr = new StringBuffer();
+
 	/** The con com. */
 	private ConvenienceCommunication conCom;
 
@@ -150,6 +152,75 @@ public class XDSConnector {
 			}
 			System.out.print("\n\n");
 		}
+
+	}
+
+	/**
+	 * <div class="en">Demonstrates the document consumer. It executes first a
+	 * query to the registry and then retrieves the last PDF and XML document
+	 * that are listed in the query result.
+	 *
+	 * @param affDomain
+	 *            the affinity domain setting containing registry and repository
+	 *            endpoints to be used
+	 * @param patientId
+	 *            the patient id to be used </div> <div class="de"></div>
+	 *            <div class="fr"></div>
+	 * @param assertionFile
+	 *            the assertion file
+	 * @return
+	 */
+	public String queryDocumentWithId(String oid, String id, String documentId) {
+
+		Identificator patientId = new Identificator(oid, id);
+
+		AffinityDomain affDomain = null;
+		outStr = new StringBuffer();
+		XDSQueryResponseType documentEntryResponse;
+
+		try {
+			Destination registryUnsecure = new Destination(oid,
+					new URI("http://localhost:9091/xds-iti18"));
+
+			Destination repositoryUnsecure = new Destination(oid,
+					new URI("http://localhost:9091/xds-iti43"));
+
+			affDomain = new AffinityDomain(null, registryUnsecure, repositoryUnsecure);
+
+		} catch (final URISyntaxException e) {
+			System.out.print("SOURCE URI CANNOT BE SET: \n" + e.getMessage() + "\n\n");
+		}
+
+		// Create a new ConvenienceCommunication Object
+		conCom = new ConvenienceCommunication(affDomain);
+		final FindDocumentsQuery fdq = new FindDocumentsQuery(patientId,
+				AvailabilityStatusType.APPROVED_LITERAL);
+		documentEntryResponse = conCom.queryDocuments(fdq);
+		List<DocumentEntryResponseType> responses = documentEntryResponse
+				.getDocumentEntryResponses();
+		if (responses.size() == 1) {
+			// TODO: make Temp folder empty
+
+			DocumentEntryType entry = responses.get(0).getDocumentEntry();
+			final DocumentRequest documentRequest = new DocumentRequest(
+					entry.getRepositoryUniqueId(), affDomain.getRepositoryDestination().getUri(),
+					entry.getUniqueId());
+			final XDSRetrieveResponseType rrt = conCom.retrieveDocument(documentRequest);
+			final XDSDocument document = rrt.getAttachments().get(0);
+			final InputStream docIS = document.getStream();
+
+			File file = new File(
+					"C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files\\temp\\return_cda.xml");
+			try {
+				FileUtils.copyInputStreamToFile(docIS, file);
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		return "C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files\\temp\\return_cda.xml";
 
 	}
 
@@ -442,6 +513,58 @@ public class XDSConnector {
 			System.out.print(e.getMessage() + "\n\n");
 		}
 
+	}
+
+	private Boolean validateNewDocument(String oid, String id, String documentId) {
+		Identificator patientId = new Identificator(oid, id);
+
+		AffinityDomain affDomain = null;
+		outStr = new StringBuffer();
+		XDSQueryResponseType documentEntryResponse;
+
+		try {
+			Destination registryUnsecure = new Destination(oid,
+					new URI("http://localhost:9091/xds-iti18"));
+
+			Destination repositoryUnsecure = new Destination(oid,
+					new URI("http://localhost:9091/xds-iti43"));
+
+			affDomain = new AffinityDomain(null, registryUnsecure, repositoryUnsecure);
+
+		} catch (final URISyntaxException e) {
+			System.out.print("SOURCE URI CANNOT BE SET: \n" + e.getMessage() + "\n\n");
+		}
+
+		// Create a new ConvenienceCommunication Object
+		conCom = new ConvenienceCommunication(affDomain);
+		final FindDocumentsQuery fdq = new FindDocumentsQuery(patientId,
+				AvailabilityStatusType.APPROVED_LITERAL);
+		documentEntryResponse = conCom.queryDocuments(fdq);
+		List<DocumentEntryResponseType> responses = documentEntryResponse
+				.getDocumentEntryResponses();
+		if (responses.size() == 1) {
+			// TODO: make Temp folder empty
+
+			DocumentEntryType entry = responses.get(0).getDocumentEntry();
+			final DocumentRequest documentRequest = new DocumentRequest(
+					entry.getRepositoryUniqueId(), affDomain.getRepositoryDestination().getUri(),
+					entry.getUniqueId());
+			final XDSRetrieveResponseType rrt = conCom.retrieveDocument(documentRequest);
+			final XDSDocument document = rrt.getAttachments().get(0);
+			final InputStream docIS = document.getStream();
+
+			File file = new File(
+					"C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files\\temp\\return_cda.xml");
+			try {
+				FileUtils.copyInputStreamToFile(docIS, file);
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		return true;
 	}
 
 }
