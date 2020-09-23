@@ -17,6 +17,7 @@
 package connector;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,6 +60,7 @@ public class XDSConnector {
 	public static final String ORGANIZATIONAL_ID = "1.19.6.24.109.42.1";
 
 	public static void main(String[] args) throws Exception {
+
 		XDSConnector xdsconnector = new XDSConnector();
 		// xds_connector is now the gateway.entry_point
 		GatewayServer server = new GatewayServer(xdsconnector);
@@ -126,9 +128,12 @@ public class XDSConnector {
 	 * @return a CDA document stream
 	 * @throws FileNotFoundException
 	 */
-	private InputStream getDocCda(String path) {
+	private InputStream getDocCda(String path) throws FileNotFoundException {
 		System.out.println("Get File: " + path);
-		InputStream cda = getClass().getResourceAsStream("/demoDocSource/" + path);
+		InputStream cda = new FileInputStream(path);
+		// getClass().getResourceAsStream(path);
+		// InputStream cda = getClass().getResourceAsStream("/demoDocSource/" +
+		// path);
 		return cda;
 	}
 
@@ -203,8 +208,9 @@ public class XDSConnector {
 			DocumentEntryType entry = null;
 			for (DocumentEntryResponseType e : responses) {
 				DocumentEntryType _entry = e.getDocumentEntry();
-				if (_entry.getUniqueId() == documentId) {
+				if (_entry.getUniqueId().equals(documentId)) {
 					entry = _entry;
+					break;
 				} else {
 					return "NO_DOCUMENT_FOUND";
 				}
@@ -219,7 +225,7 @@ public class XDSConnector {
 			final InputStream docIS = document.getStream();
 
 			File file = new File(
-					"C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files\\temp\\return_cda.xml");
+					"C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files\\tempDownload\\return_cda.xml");
 			try {
 				FileUtils.copyInputStreamToFile(docIS, file);
 
@@ -486,7 +492,7 @@ public class XDSConnector {
 	 * @param assertionFile
 	 * @throws Exception
 	 */
-	public void uploadDocument(String oid, String id, String documentId, String docPath) {
+	public void uploadDocument(String oid, String id, String documentId, String fileTempPath) {
 
 		Identificator patientId = new Identificator(oid, id);
 
@@ -505,7 +511,7 @@ public class XDSConnector {
 
 			// Sending CDA Document to Repository (NON-TLS)
 			final DocumentMetadata metaData1 = conCom1.addDocument(DocumentDescriptor.CDA_R2,
-					getDocCda(docPath), getDocCda(docPath));
+					getDocCda(fileTempPath), getDocCda(fileTempPath));
 			setMetaDatForCDA(metaData1, patientId, documentId);
 
 			System.out.print("Sending CDA Document...");
@@ -547,7 +553,6 @@ public class XDSConnector {
 			System.out.print("SOURCE URI CANNOT BE SET: \n" + e.getMessage() + "\n\n");
 		}
 
-		// Create a new ConvenienceCommunication Object
 		conCom = new ConvenienceCommunication(affDomain);
 		final FindDocumentsQuery fdq = new FindDocumentsQuery(patientId,
 				AvailabilityStatusType.APPROVED_LITERAL);
@@ -557,10 +562,15 @@ public class XDSConnector {
 		if (responses.size() > 0) {
 			for (DocumentEntryResponseType e : responses) {
 				DocumentEntryType _entry = e.getDocumentEntry();
-				if (_entry.getUniqueId() == documentId)
+				System.out.println("Compare: " + _entry.getUniqueId() + " == " + documentId);
+				if (_entry.getUniqueId().equals(documentId)) {
+					System.out.println("Document schon vorhanden!");
 					return true;
+				}
+
 			}
 		}
+		System.out.println("Document noch nicht vorhanden!");
 		return false;
 	}
 
