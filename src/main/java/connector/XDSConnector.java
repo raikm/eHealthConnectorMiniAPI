@@ -302,9 +302,11 @@ public class XDSConnector {
 			final XDSRetrieveResponseType rrt = conCom.retrieveDocument(documentRequest);
 			final XDSDocument document = rrt.getAttachments().get(0);
 			final InputStream docIS = document.getStream();
-
+			String patientID = entry.getPatientId().getIdNumber();
+			String documentID = entry.getUniqueId();
 			File file = new File(
-					"C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files\\tempDownload\\return_cda.xml");
+					"C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files\\tempDownload\\"
+							+ patientID + "\\" + documentID + "_" + patientID + ".xml");
 			try {
 				FileUtils.copyInputStreamToFile(docIS, file);
 
@@ -312,9 +314,11 @@ public class XDSConnector {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			return "C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files\\tempDownload\\"
+					+ patientID + "\\" + documentID + "_" + patientID + ".xml";
 
 		}
-		return "C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files\\temp\\return_cda.xml";
+		return "NO_DOCUMENT_FOUND";
 
 	}
 
