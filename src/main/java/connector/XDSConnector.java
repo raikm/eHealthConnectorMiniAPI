@@ -74,26 +74,105 @@ public class XDSConnector {
 	private ConvenienceCommunication conCom;
 
 	/**
-	 * Finds the last registered document.
+	 * <div class="en">Demonstrates the document consumer. It executes first a
+	 * query to the registry and then retrieves the last PDF and XML document
+	 * that are listed in the query result.
 	 *
-	 * @param qr
-	 *            the query response
-	 * @param mimeType
-	 *            the mime type
-	 * @return the document entry type
+	 * @param affDomain
+	 *            the affinity domain setting containing registry and repository
+	 *            endpoints to be used
+	 * @param patientId
+	 *            the patient id to be used </div> <div class="de"></div>
+	 *            <div class="fr"></div>
+	 * @param assertionFile
+	 *            the assertion file
 	 */
-	private DocumentEntryType findLastDoc(XDSQueryResponseType qr, String mimeType) {
-		DocumentEntryType docEntry = null;
-		for (int i = (qr.getDocumentEntryResponses().size() - 1); i < qr.getDocumentEntryResponses()
-				.size(); i--) {
-			final DocumentEntryResponseType response = qr.getDocumentEntryResponses()
-					.get((qr.getDocumentEntryResponses().size() - 1) - i);
-			docEntry = response.getDocumentEntry();
-			if (docEntry.getMimeType().equals(mimeType)) {
-				return docEntry;
-			}
+	public void downloadPatientFiles(String oid, String id) {
+
+		Identificator patientId = new Identificator(oid, id);
+
+		AffinityDomain affDomain = null;
+		outStr = new StringBuffer();
+		XDSQueryResponseType qr;
+
+		try {
+			Destination registryUnsecure = new Destination(oid,
+					new URI("http://localhost:9091/xds-iti18"));
+
+			Destination repositoryUnsecure = new Destination(oid,
+					new URI("http://localhost:9091/xds-iti43"));
+
+			affDomain = new AffinityDomain(null, registryUnsecure, repositoryUnsecure);
+
+		} catch (final URISyntaxException e) {
+			System.out.print("SOURCE URI CANNOT BE SET: \n" + e.getMessage() + "\n\n");
 		}
-		return null;
+
+		try {
+			// Create a new ConvenienceCommunication Object
+			conCom = new ConvenienceCommunication(affDomain);
+
+			// 1. Create and perform query for references
+			final FindDocumentsQuery fdq = new FindDocumentsQuery(patientId,
+					AvailabilityStatusType.APPROVED_LITERAL);
+			qr = conCom.queryDocumentsReferencesOnly(fdq);
+			outStr.append("\nQuery for document references. Response status: "
+					+ qr.getStatus().getName());
+			outStr.append(". Returned " + qr.getReferences().size() + " references.");
+
+			if (qr.getReferences().size() < 1) {
+				outStr.append("\nNo Documents found for patient '" + patientId.getRoot() + "/"
+						+ patientId.getExtension() + "' in registry: "
+						+ affDomain.getRegistryDestination().getUri());
+			} else {
+
+				// 2. Create and perform query for document metadata
+				int numberOfDocumentMetadataQuery = qr.getReferences().size();
+
+				final String[] docUUIDs = new String[numberOfDocumentMetadataQuery];
+				for (int i = 0; i < numberOfDocumentMetadataQuery; i++) {
+					final ObjectRefType ort = qr.getReferences()
+							.get((qr.getReferences().size() - 1) - i);
+					docUUIDs[i] = ort.getId();
+				}
+				final GetDocumentsQuery gdq = new GetDocumentsQuery(docUUIDs, true);
+				qr = conCom.queryDocuments(gdq);
+				if (qr != null) {
+					outStr.append("\nQuery for document metadata of the last "
+							+ Integer.toString(numberOfDocumentMetadataQuery)
+							+ " documents. Response status: " + qr.getStatus().getName());
+					outStr.append(
+							". Returned " + qr.getDocumentEntryResponses().size() + " documents.");
+					if (qr.getDocumentEntryResponses().size() < 1) {
+						outStr.append("\nNo Documents found for patient '" + patientId.getRoot()
+								+ "/" + patientId.getExtension() + "' in registry: "
+								+ affDomain.getRegistryDestination().getUri());
+					} else {
+						DocumentEntryType docEntry = null;
+						// Retrieve Files from the repository and store it to
+						// disc
+						List<DocumentEntryResponseType> responses = qr.getDocumentEntryResponses();
+
+						for (DocumentEntryResponseType e : responses) {
+							docEntry = e.getDocumentEntry();
+							outStr.append("\nFound XML document for patient '" + patientId.getRoot()
+									+ "/" + patientId.getExtension() + "' in registry: "
+									+ affDomain.getRegistryDestination().getUri() + ":\n"
+									+ DebugUtil.debugDocumentMetaData(docEntry));
+							storeDocument(affDomain, docEntry);
+						}
+					}
+
+				} else
+					outStr.append("\n*** FAILURE :" + conCom.getLastError());
+			}
+
+		} catch (final Exception e) {
+			System.out.print(e.getMessage() + "\n");
+			e.printStackTrace();
+		}
+
+		System.out.print(outStr.toString() + "\n");
 	}
 
 	/**
@@ -216,7 +295,7 @@ public class XDSConnector {
 				}
 
 			}
-
+			// TODO: use method retrieveAndStore
 			final DocumentRequest documentRequest = new DocumentRequest(
 					entry.getRepositoryUniqueId(), affDomain.getRepositoryDestination().getUri(),
 					entry.getUniqueId());
@@ -237,145 +316,6 @@ public class XDSConnector {
 		}
 		return "C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files\\temp\\return_cda.xml";
 
-	}
-
-	/**
-	 * <div class="en">Demonstrates the document consumer. It executes first a
-	 * query to the registry and then retrieves the last PDF and XML document
-	 * that are listed in the query result.
-	 *
-	 * @param affDomain
-	 *            the affinity domain setting containing registry and repository
-	 *            endpoints to be used
-	 * @param patientId
-	 *            the patient id to be used </div> <div class="de"></div>
-	 *            <div class="fr"></div>
-	 * @param assertionFile
-	 *            the assertion file
-	 */
-	public void queryRetrieveDemo(String oid, String id) {
-
-		Identificator patientId = new Identificator(oid, id);
-
-		AffinityDomain affDomain = null;
-		outStr = new StringBuffer();
-		int numberOfDocumentMetadataQuery = 10;
-		XDSQueryResponseType qr;
-
-		try {
-			Destination registryUnsecure = new Destination(oid,
-					new URI("http://localhost:9091/xds-iti18"));
-
-			Destination repositoryUnsecure = new Destination(oid,
-					new URI("http://localhost:9091/xds-iti43"));
-
-			affDomain = new AffinityDomain(null, registryUnsecure, repositoryUnsecure);
-
-		} catch (final URISyntaxException e) {
-			System.out.print("SOURCE URI CANNOT BE SET: \n" + e.getMessage() + "\n\n");
-		}
-
-		try {
-			// Create a new ConvenienceCommunication Object
-			conCom = new ConvenienceCommunication(affDomain);
-
-			// 1. Create and perform query for references
-			final FindDocumentsQuery fdq = new FindDocumentsQuery(patientId,
-					AvailabilityStatusType.APPROVED_LITERAL);
-			qr = conCom.queryDocumentsReferencesOnly(fdq);
-			outStr.append("\nQuery for document references. Response status: "
-					+ qr.getStatus().getName());
-			outStr.append(". Returned " + qr.getReferences().size() + " references.");
-			if (qr.getReferences().size() < 1) {
-				outStr.append("\nNo Documents found for patient '" + patientId.getRoot() + "/"
-						+ patientId.getExtension() + "' in registry: "
-						+ affDomain.getRegistryDestination().getUri()
-						+ ".\nYou might use the DocumentSourceDemo to upload sample files (one pdf and one xml).");
-			} else {
-
-				// 2. Create and perform query for document metadata (of the
-				// last 10 documents)
-				if (qr.getReferences().size() < numberOfDocumentMetadataQuery) {
-					numberOfDocumentMetadataQuery = qr.getReferences().size();
-				}
-				final String[] docUUIDs = new String[numberOfDocumentMetadataQuery];
-				for (int i = 0; i < numberOfDocumentMetadataQuery; i++) {
-					final ObjectRefType ort = qr.getReferences()
-							.get((qr.getReferences().size() - 1) - i);
-					docUUIDs[i] = ort.getId();
-				}
-				final GetDocumentsQuery gdq = new GetDocumentsQuery(docUUIDs, true);
-				qr = conCom.queryDocuments(gdq);
-				if (qr != null) {
-					outStr.append("\nQuery for document metadata of the last "
-							+ Integer.toString(numberOfDocumentMetadataQuery)
-							+ " documents. Response status: " + qr.getStatus().getName());
-					outStr.append(
-							". Returned " + qr.getDocumentEntryResponses().size() + " documents.");
-					if (qr.getDocumentEntryResponses().size() < 1) {
-						outStr.append("\nNo Documents found for patient '" + patientId.getRoot()
-								+ "/" + patientId.getExtension() + "' in registry: "
-								+ affDomain.getRegistryDestination().getUri());
-					} else {
-
-						// Find the last XML Document, retrieve it from the
-						// repository and store it to disc
-						DocumentEntryType docEntry = findLastDoc(qr, "text/xml");
-						if (docEntry == null) {
-							outStr.append(
-									"\nNo XML document found for patient '" + patientId.getRoot()
-											+ "/" + patientId.getExtension() + "' in registry: "
-											+ affDomain.getRegistryDestination().getUri() + "\n");
-						} else {
-							outStr.append("\nFound XML document for patient '" + patientId.getRoot()
-									+ "/" + patientId.getExtension() + "' in registry: "
-									+ affDomain.getRegistryDestination().getUri() + ":\n"
-									+ DebugUtil.debugDocumentMetaData(docEntry));
-							retrieveAndStore(affDomain, docEntry);
-						}
-					}
-
-				} else
-					outStr.append("\n*** FAILURE :" + conCom.getLastError());
-			}
-
-		} catch (final Exception e) {
-			System.out.print(e.getMessage() + "\n");
-			e.printStackTrace();
-		}
-
-		System.out.print(outStr.toString() + "\n");
-	}
-
-	/**
-	 * Retrieve and store.
-	 *
-	 * @param affDomain
-	 *            the aff domain
-	 * @param docEntry
-	 *            the doc entry
-	 * @return true, if successful
-	 * @throws URISyntaxException
-	 *             the URI syntax exception
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	private boolean retrieveAndStore(AffinityDomain affDomain, DocumentEntryType docEntry)
-			throws URISyntaxException, IOException {
-
-		final DocumentRequest documentRequest = new DocumentRequest(
-				docEntry.getRepositoryUniqueId(), affDomain.getRepositoryDestination().getUri(),
-				docEntry.getUniqueId());
-		final XDSRetrieveResponseType rrt = conCom.retrieveDocument(documentRequest);
-
-		final boolean stored = storeDocument(docEntry, rrt);
-
-		if (!stored) {
-			outStr.append("\nDOCUMENT NOT RETRIEVED (" + docEntry.getUniqueId()
-					+ ") from repository: " + affDomain.getRepositoryDestination().getUri());
-
-		}
-		return stored;
 	}
 
 	/** set metaData only needed for IPF XDS Framework **/
@@ -430,6 +370,41 @@ public class XDSConnector {
 				&& metaData.getMdhtDocumentEntryType().getLegalAuthenticator() != null) {
 			metaData.getMdhtDocumentEntryType().getLegalAuthenticator()
 					.setAssigningAuthorityName("");
+		}
+
+	}
+
+	/**
+	 * Retrieve and store.
+	 *
+	 * @param affDomain
+	 *            the aff domain
+	 * @param docEntry
+	 *            the doc entry
+	 */
+	private void storeDocument(AffinityDomain affDomain, DocumentEntryType docEntry) {
+
+		final DocumentRequest documentRequest = new DocumentRequest(
+				docEntry.getRepositoryUniqueId(), affDomain.getRepositoryDestination().getUri(),
+				docEntry.getUniqueId());
+		final XDSRetrieveResponseType rrt = conCom.retrieveDocument(documentRequest);
+		final XDSDocument document = rrt.getAttachments().get(0);
+		final InputStream docIS = document.getStream();
+		String patientID = docEntry.getPatientId().getIdNumber();
+		String documentID = docEntry.getUniqueId();
+
+		File file = new File(
+				"C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files\\tempDownload\\"
+						+ patientID + "\\" + documentID + "_" + patientID + ".xml");
+		try {
+			FileUtils.copyInputStreamToFile(docIS, file);
+			System.out.println(
+					"Document saved: C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files\\tempDownload\\"
+							+ patientID + "\\" + documentID + "_" + patientID + ".xml");
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 	}
