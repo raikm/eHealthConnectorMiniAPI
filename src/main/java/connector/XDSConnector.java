@@ -30,7 +30,6 @@ import org.ehealth_connector.common.enums.LanguageCode;
 import org.ehealth_connector.common.mdht.Code;
 import org.ehealth_connector.common.mdht.Identificator;
 import org.ehealth_connector.common.utils.DebugUtil;
-import org.ehealth_connector.common.utils.FileUtil;
 import org.ehealth_connector.common.utils.XdsMetadataUtil;
 import org.ehealth_connector.communication.AffinityDomain;
 import org.ehealth_connector.communication.ConvenienceCommunication;
@@ -74,9 +73,6 @@ public class XDSConnector {
 	private ConvenienceCommunication conCom;
 
 	/**
-	 * <div class="en">Demonstrates the document consumer. It executes first a
-	 * query to the registry and then retrieves the last PDF and XML document
-	 * that are listed in the query result.
 	 *
 	 * @param affDomain
 	 *            the affinity domain setting containing registry and repository
@@ -159,7 +155,19 @@ public class XDSConnector {
 									+ "/" + patientId.getExtension() + "' in registry: "
 									+ affDomain.getRegistryDestination().getUri() + ":\n"
 									+ DebugUtil.debugDocumentMetaData(docEntry));
-							storeDocument(affDomain, docEntry);
+
+							String patientID = docEntry.getPatientId().getIdNumber();
+							String documentID = docEntry.getUniqueId();
+							String rootPath = "C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files\\tempDownload";
+							String filePath = rootPath + "\\" + patientID + "\\" + documentID + "_"
+									+ patientID + ".xml";
+							File tempFile = new File(filePath);
+
+							if (!tempFile.exists()) {
+								System.out.println("File not Exist: Start Download ...");
+								storeDocument(affDomain, docEntry);
+							}
+
 						}
 					}
 
@@ -296,6 +304,7 @@ public class XDSConnector {
 
 			}
 			// TODO: use method retrieveAndStore
+			System.out.println("Download CDA File");
 			final DocumentRequest documentRequest = new DocumentRequest(
 					entry.getRepositoryUniqueId(), affDomain.getRepositoryDestination().getUri(),
 					entry.getUniqueId());
@@ -413,51 +422,57 @@ public class XDSConnector {
 
 	}
 
-	/**
-	 * Store document.
-	 *
-	 * @param docEntry
-	 *            the doc entry
-	 * @param rrt
-	 *            the rrt
-	 * @return true, if successful
-	 * @throws URISyntaxException
-	 *             the URI syntax exception
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	private boolean storeDocument(DocumentEntryType docEntry, XDSRetrieveResponseType rrt)
-			throws URISyntaxException, IOException {
-		if (rrt.getAttachments() == null) {
-		} else if (rrt.getAttachments().size() > 0) {
-			if (rrt.getErrorList() != null) {
-				outStr.append(
-						"\nErrors: " + rrt.getErrorList().getHighestSeverity().getName() + ".");
-			}
-			outStr.append("\nRetrieve sucessful. Retrieved: " + rrt.getAttachments().size()
-					+ " documents.");
-			final XDSDocument document = rrt.getAttachments().get(0);
-
-			outStr.append("\nFirst document returned: " + document.toString());
-			final InputStream docIS = document.getStream();
-
-			// Create a new File with the RepositoryId as prefix
-			final String filePath = "C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files"; // Temp
-																																						// Folder:
-																																						// Util.getTempDirectory();
-
-			final File targetFile = new File(filePath + FileUtil.getPlatformSpecificPathSeparator()
-					+ docEntry.getRepositoryUniqueId() + "_"
-					+ docEntry.getEntryUUID().replace("urn:uuid:", "") + "_"
-					+ docEntry.getMimeType().replace("/", "."));
-
-			FileUtils.copyInputStreamToFile(docIS, targetFile);
-			outStr.append("\nDocument was stored to: " + targetFile.getCanonicalPath() + "\n");
-		} else {
-			return false;
-		}
-		return true;
-	}
+	// /**
+	// * Store document.
+	// *
+	// * @param docEntry
+	// * the doc entry
+	// * @param rrt
+	// * the rrt
+	// * @return true, if successful
+	// * @throws URISyntaxException
+	// * the URI syntax exception
+	// * @throws IOException
+	// * Signals that an I/O exception has occurred.
+	// */
+	// private boolean storeDocument(DocumentEntryType docEntry,
+	// XDSRetrieveResponseType rrt)
+	// throws URISyntaxException, IOException {
+	// if (rrt.getAttachments() == null) {
+	// } else if (rrt.getAttachments().size() > 0) {
+	// if (rrt.getErrorList() != null) {
+	// outStr.append(
+	// "\nErrors: " + rrt.getErrorList().getHighestSeverity().getName() + ".");
+	// }
+	// outStr.append("\nRetrieve sucessful. Retrieved: " +
+	// rrt.getAttachments().size()
+	// + " documents.");
+	// final XDSDocument document = rrt.getAttachments().get(0);
+	//
+	// outStr.append("\nFirst document returned: " + document.toString());
+	// final InputStream docIS = document.getStream();
+	//
+	// // Create a new File with the RepositoryId as prefix
+	// final String filePath = "C:\\Users\\Raik
+	// Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files";
+	// // Temp
+	// // Folder:
+	// // Util.getTempDirectory();
+	//
+	// final File targetFile = new File(filePath +
+	// FileUtil.getPlatformSpecificPathSeparator()
+	// + docEntry.getRepositoryUniqueId() + "_"
+	// + docEntry.getEntryUUID().replace("urn:uuid:", "") + "_"
+	// + docEntry.getMimeType().replace("/", "."));
+	//
+	// FileUtils.copyInputStreamToFile(docIS, targetFile);
+	// outStr.append("\nDocument was stored to: " +
+	// targetFile.getCanonicalPath() + "\n");
+	// } else {
+	// return false;
+	// }
+	// return true;
+	// }
 
 	public void testPythonConnection() {
 		System.out.println("Python Connection Test: Successful\n");
