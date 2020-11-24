@@ -408,12 +408,12 @@ public class XDSConnector {
 
 		File file = new File(
 				"C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files\\tempDownload\\"
-						+ patientID + "\\" + documentID + "_" + patientID + ".xml");
+						+ patientID + "\\" + patientID + "_" + documentID + ".xml");
 		try {
 			FileUtils.copyInputStreamToFile(docIS, file);
 			System.out.println(
 					"Document saved: C:\\Users\\Raik Müller\\Documents\\GitHub\\RecruitmentTool_Backend\\Django_Server\\recruitmenttool\\cda_files\\tempDownload\\"
-							+ patientID + "\\" + documentID + "_" + patientID + ".xml");
+							+ patientID + "\\" + patientID + "_" + documentID + ".xml");
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
